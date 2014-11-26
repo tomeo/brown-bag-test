@@ -1,0 +1,120 @@
+%!TEX program = xelatex
+\documentclass{beamer}
+\usepackage{blindtext}
+\usepackage{color}
+\definecolor{bluekeywords}{rgb}{0.13,0.13,1}
+\definecolor{greencomments}{rgb}{0,0.5,0}
+\definecolor{redstrings}{rgb}{0.9,0,0}
+\definecolor{light-gray}{gray}{0.85}
+\definecolor{white}{rgb}{1,1,1}
+\usepackage{listings}
+\lstset{language=[Sharp]C,
+	showspaces=false,
+	showtabs=false,
+	numbers=left,
+    breaklines=true,
+    backgroundcolor=\color{white},
+	showstringspaces=false,
+	breakatwhitespace=true,
+	escapeinside={(*@}{@*)},
+	commentstyle=\color{greencomments},
+	keywordstyle=\color{bluekeywords},
+	stringstyle=\color{redstrings},
+	basicstyle=\ttfamily,
+	tabsize=3
+}
+\usetheme{Execushares}
+\title{A first step towards testable and maintainable code}
+\subtitle{How to tame the beast that is EPiSERVER}
+\author{Tommy Ivarsson}
+\date{\today}
+
+\setcounter{showSlideNumbers}{1}
+
+\begin{document}
+	\setcounter{showProgressBar}{0}
+	\setcounter{showSlideNumbers}{0}
+
+	\frame{\titlepage}
+
+	\setcounter{framenumber}{0}
+	\setcounter{showProgressBar}{1}
+	\setcounter{showSlideNumbers}{1}
+	\section{Testable code}
+		\begin{frame}
+			\frametitle{What does it mean?}
+			\begin{enumerate}
+				\item It is possible to write reliable and automatic tests \pause
+				\item The tests are portable - They do not have external dependencies \pause
+			\end{enumerate}
+		\end{frame}
+		\begin{frame}
+			\frametitle{Difficult to test}
+			%\lstinputlisting{code-examples/file.cs}
+		\end{frame}
+		\begin{frame}
+			\frametitle{Easy to test}
+			%\lstinputlisting{code-examples/file.cs}
+		\end{frame}
+
+	\section{What are the main properties of testable code?}
+		\begin{frame}
+			\frametitle{Properties of a testable method} \pause
+			\begin{itemize}
+				\item Pure function \pause
+				\begin{itemize}
+					\item $f(a) = b$ \pause
+					\item No side effects \pause
+				\end{itemize}
+				\item Independent of application state \pause
+				\item Independent of environment \pause
+				\item Dependencies are resolved using dependency injection
+			\end{itemize}
+		\end{frame}
+
+	\section{What is dependency injection?}
+		\begin{frame}
+			\frametitle{Dependency injection} \pause
+			\begin{exampleblock}{}
+				{\large ``An injection is the passing of a dependency (a service) to a dependent object (a client).''}
+				\vskip5mm
+				\hspace*\fill{\small--- Wikipedia} \pause
+			\end{exampleblock}
+			\begin{exampleblock}{Benefits of Depedency Injection} \pause
+				\begin{itemize}
+					\item Code easier to test as depedencies can be mocked \pause
+					\item Class dependencies listed in the constructor \pause
+					\item Cleaner code
+				\end{itemize}
+			\end{exampleblock}
+		\end{frame}
+		\begin{frame}
+			\frametitle{Code without dependency injection}
+			\lstinputlisting{code-examples/di-no-di.cs}
+		\end{frame}
+		\begin{frame}
+			\frametitle{Code with dependency injection}
+			\lstinputlisting{code-examples/di-di.cs}
+		\end{frame}
+
+	\section{Dependency injection in EPiSERVER}
+		\begin{frame}
+			\frametitle{Tempting, but not good}
+			\lstinputlisting{code-examples/di-servicelocator.cs} \pause
+			\begin{exampleblock}{Disadvantages} \pause
+				\begin{itemize}
+					\item Ugly \pause
+					\item Requires more code for mock setup \pause
+					\item Class dependencies not listed in constructor
+				\end{itemize}
+			\end{exampleblock}
+		\end{frame}
+		\begin{frame}
+			\frametitle{Correct way to get an instance}
+			\lstinputlisting{code-examples/di-servicelocator-ok.cs}
+		\end{frame}
+		\begin{frame}
+			\frametitle{Registering your own service}
+			\lstinputlisting{code-examples/di-structuremap.cs}
+		\end{frame}
+\end{document}
