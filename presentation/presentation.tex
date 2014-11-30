@@ -20,12 +20,12 @@
 	commentstyle=\color{greencomments},
 	keywordstyle=\color{bluekeywords},
 	stringstyle=\color{redstrings},
-	basicstyle=\ttfamily,
+	basicstyle=\fontsize{8}{8}\selectfont\ttfamily,
 	tabsize=3
 }
 \usetheme{Execushares}
-\title{A first step towards testable and maintainable code}
-\subtitle{How to tame the beast that is EPiSERVER}
+\title{Unit testing EPiSERVER}
+\subtitle{How to write testable and maintainable code}
 \author{Tommy Ivarsson}
 \date{\today}
 
@@ -42,19 +42,30 @@
 	\setcounter{showSlideNumbers}{1}
 	\section{Testable code}
 		\begin{frame}
-			\frametitle{What does it mean?}
-			\begin{enumerate}
-				\item It is possible to write reliable and automatic tests \pause
-				\item The tests are portable - They do not have external dependencies
-			\end{enumerate}
+			\frametitle{What does it mean and why?} \pause
+			\begin{exampleblock}{What does it mean to write testable code?} \pause
+				\begin{itemize}
+					\item Write modules which are not tigthly bound to the implementation of any dependency \pause
+					\item Know the limitations of your testing frameworks and write your code accordingly \pause
+				\end{itemize}
+			\end{exampleblock}
+			\begin{exampleblock}{Why do we want testable code?} \pause
+				\begin{itemize}
+					\item Confidence \pause
+					\begin{itemize}
+						\item Confidence in not breaking the work of others \pause
+						\item Confidence in not changing existing logic when adding new logic
+					\end{itemize}
+				\end{itemize}
+			\end{exampleblock}
 		\end{frame}
 		\begin{frame}
 			\frametitle{Difficult to test}
-			%\lstinputlisting{code-examples/file.cs}
+			\lstinputlisting{code-examples/intro-hard.cs}
 		\end{frame}
 		\begin{frame}
 			\frametitle{Easy to test}
-			%\lstinputlisting{code-examples/file.cs}
+			\lstinputlisting{code-examples/intro-easy.cs}
 		\end{frame}
 
 	\section{What are the main properties of testable code?}
@@ -68,6 +79,7 @@
 				\end{itemize}
 				\item Independent of application state \pause
 				\item Independent of environment \pause
+				\item Independent of dependency implementation \pause
 				\item Dependencies are resolved using dependency injection
 			\end{itemize}
 		\end{frame}
@@ -80,11 +92,12 @@
 				\vskip5mm
 				\hspace*\fill{\small--- Wikipedia} \pause
 			\end{exampleblock}
-			\begin{exampleblock}{Benefits of Depedency Injection} \pause
+			\begin{exampleblock}{Advantages of Dependency Injection} \pause
 				\begin{itemize}
-					\item Code easier to test as depedencies can be mocked \pause
+					\item Code easier to test as dependencies can be mocked \pause
+					\item Easily applied to existing code \pause
 					\item Class dependencies listed in the constructor \pause
-					\item Cleaner code which is easier to maintain
+					\item Promotes reusability, testability and maintainability
 				\end{itemize}
 			\end{exampleblock}
 		\end{frame}
@@ -116,5 +129,113 @@
 		\begin{frame}
 			\frametitle{Registering your own service}
 			\lstinputlisting{code-examples/di-structuremap.cs}
+		\end{frame}
+
+	\section{Unit testing frameworks}
+	\begin{frame}
+			\frametitle{Examples of unit testing frameworks} \pause
+			\begin{exampleblock}{There are two main frameworks} \pause
+			\begin{itemize}
+				\item MS-Test \pause
+				\begin{itemize}
+					\item $+$ Included in Visual Studio \pause
+				\end{itemize}
+				\item NUnit \pause
+				\begin{itemize}
+					\item $+$ Code is more readable \pause
+					\item $+$ Supports multiple test cases for same test \pause
+				\end{itemize}
+			\end{itemize}
+			\end{exampleblock}
+
+			\begin{exampleblock}{I prefer NUnit but which one you use does not make a big difference}
+			\end{exampleblock}
+		\end{frame}
+
+	\section{Mocking frameworks}
+		% \begin{frame}
+		% 	\frametitle{Why use a mocking framework?} \pause
+		% 	\begin{exampleblock}{Why write code that you don't have to?} \pause
+		% 		\begin{itemize}
+		% 				\item Not using a mocking framework is silly \pause
+		% 				\item Which one you use is up to you
+		% 		\end{itemize}
+		% 	\end{exampleblock}
+		% \end{frame}
+
+		\begin{frame}
+			\frametitle{Examples of mocking frameworks} \pause
+			\begin{exampleblock}{There are A LOT of frameworks to choose from, examples are:} \pause
+			\begin{itemize}
+				\item Moq \pause
+				\begin{itemize}
+					\item $+$ Popular in the EPiSERVER community \pause
+					\item $+$ Lots of StackOverflow posts \pause
+					\item $+$ Been around for ages \pause
+					\item $-$ Lambda hell $\Rightarrow$ Difficult to read \pause
+				\end{itemize}
+				\item NSubstitute \pause
+				\begin{itemize}
+					\item $+$ Scarce use of lambdas $\Rightarrow$ Easy to read \pause
+					\item $+$ Lots of StackOverflow posts \pause
+					\item $-$ Not popular in the EPiSERVER community \pause
+				\end{itemize}
+			\end{itemize}
+			\end{exampleblock}
+
+			\begin{exampleblock}{I prefer NSubstitute but which one you use does not make a big difference}
+			\end{exampleblock}
+		\end{frame}
+
+	\section{Writing tests}
+		\begin{frame}
+			\frametitle{Tools} \pause
+			\begin{itemize}
+				\item NUnit \pause
+				\item NUnit Test Adapter \pause
+				\item NSubstitute
+			\end{itemize}
+		\end{frame}
+		\begin{frame}
+			\frametitle{Methodologies} \pause
+			\begin{itemize}
+				\item Do not test external logic (for example EPiSERVER functionality)\pause
+				\item One folder for each class, one test file for each method \pause
+				\item Descriptive test names \pause
+				\item Arrange, Act, Assert 
+			\end{itemize}
+		\end{frame}
+		\begin{frame}
+			\frametitle{Simple example}
+			\lstinputlisting{code-examples/test-easy.cs}
+		\end{frame}
+		\begin{frame}
+			\frametitle{TestCase example}
+			\lstinputlisting{code-examples/test-easy2.cs}
+		\end{frame}
+		\begin{frame}
+			\frametitle{Recall this method}
+			\lstinputlisting{code-examples/intro-easy.cs}
+		\end{frame}
+
+		\begin{frame}
+			\frametitle{The setup}
+			\lstinputlisting{code-examples/test-nsubstitute-example.cs}
+		\end{frame}
+
+		\begin{frame}
+			\frametitle{Arrange, Act, Assert}
+			\lstinputlisting{code-examples/test-nsubstitute-example2.cs}
+		\end{frame}
+
+		\section{Conclusion}
+		\begin{frame}
+			\frametitle{A few simple pointers} \pause
+			\begin{itemize}
+				\item Test the class you are testing, not the dependencies \pause
+				\item Use dependency injection properly \pause
+				\item Isolate your logic \pause
+				\item Programming is a craft. Care for your code like a proper craftsman 
+			\end{itemize}
 		\end{frame}
 \end{document}
