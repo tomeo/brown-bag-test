@@ -1,0 +1,187 @@
+\title{Unit Testing EPiSERVER}
+\author{Tommy Ivarsson}
+\date{\today}
+
+\documentclass[12pt]{article}
+\usepackage{color}
+\definecolor{bluekeywords}{rgb}{0.13,0.13,1}
+\definecolor{greencomments}{rgb}{0,0.5,0}
+\definecolor{redstrings}{rgb}{0.9,0,0}
+\definecolor{light-gray}{gray}{0.85}
+\definecolor{white}{rgb}{1,1,1}
+\usepackage{listings}
+\lstset{language=[Sharp]C,
+	showspaces=false,
+	showtabs=false,
+	numbers=left,
+    breaklines=true,
+    backgroundcolor=\color{white},
+	showstringspaces=false,
+	breakatwhitespace=true,
+	escapeinside={(*@}{@*)},
+	commentstyle=\color{greencomments},
+	keywordstyle=\color{bluekeywords},
+	stringstyle=\color{redstrings},
+	basicstyle=\fontsize{10}{10}\selectfont\ttfamily,
+	tabsize=3
+}
+\begin{document}
+\maketitle
+
+\section{Testable code}
+So we want to write testable code. But what does that mean and why do we want to do it?
+
+\subsection{What does it mean to write testable code?}
+\begin{itemize}
+	\item We need to write modules which are not tightly bound to the implementation of any dependency
+	\item We need to know the limitations of our testing frameworks and write our code accordingly
+\end{itemize}
+
+\subsection{Why do we want testable code?}
+\begin{itemize}
+	\item Confidence
+	\begin{itemize}
+		\item Confidence in not breaking the work of others
+		\item Confidence in not changing existing logic when adding new logic
+	\end{itemize}
+\end{itemize}
+
+\subsection{Difficult to test}
+This is an example of code written for EPiSERVER which is difficult to test.
+\lstinputlisting{../presentation/code-examples/intro-hard.cs}
+
+There are several problems with this code:
+\begin{itemize}
+	\item The implementation is tightly bound to the implementation of \emph{Category} which means that any test for this method can't be isolated 
+	\item The inproper use of dependency injection on line $2$ and $3$
+	\item The static call to \emph{Category.Find} on line $5$
+	\item The static call to \emph{PageReference.StartPage} on line $8$
+\end{itemize}
+
+Static calls can typically not be mocked and testing code which uses them is therefore difficult. Static calls also tightly bind the implementation of one class to that of the static method.
+
+\subsection{Easy to test}
+This is the same example rewritten to make testing easier.
+\lstinputlisting{../presentation/code-examples/intro-easy.cs}
+\begin{itemize}
+	\item The implementation is no longer tightly bound to any other implementation. The relationships are now purely via interfaces
+	\item The proper use dependency injection enables us to write less mocking code
+	\item The dependencies of the class are now clearly stated in the constructor
+\end{itemize}
+
+\section{What are the main properties of testable code?}
+\subsection{Pure function}
+In functional programming there is a concept called a pure function. A pure function has many properties however two of them describe exactly the kind of method which is easy to test.
+\begin{itemize}
+	\item For any given input the method \emph{always} returns the same output.
+	\item The method has no side effects. It doesn't change any state.
+\end {itemize}
+
+If you stride towards writing methods which adhere to these properties you will find that your code is very easy to test.
+
+\subsection{Independent of application state}
+If your method depends on the state of your application then your code is not properly isolated and will be difficult to unit test.
+
+\subsection{Independent of environment}
+If your code is dependent on a specific environment to run properly then writing unit tests may be very difficult.
+
+\subsection{Independent of dependency implementation}
+You don't want your classes to be tightly bound to any other classes, unless those classes are models or entities. Relationships should as often as possible be via interface.
+
+\subsection{Dependencies are resolved using dependency injection}
+An object which uses a service should not create the instance of the service. The service should be injected to the object using dependency injection as this greatly increases the testability of your code.
+
+\section{What is dependency injection?}
+{\large ``An injection is the passing of a dependency (a service) to a dependent object (a client).''}
+\vskip5mm
+\hspace*\fill{\small--- Wikipedia}
+
+The real beauty of dependency injection is that while it in theory is a very complicated concept, actually using it is very easy.
+
+\subsection{Advantages of dependency injection}
+\begin{itemize}
+	\item Code easier to test as dependencies can be mocked
+	\item Easily applied to existing code
+	\item Class dependencies listed in the constructor
+	\item Promotes reusability, testability and maintainability
+\end{itemize}
+
+\subsection{Code without dependency injection}
+\lstinputlisting{../presentation/code-examples/di-no-di.cs}
+
+As you can see on line $5$ we new up \emph{Service} which tightly binds this class to the implementation of \emph{Service}.
+
+This means that any unit test testing this method will in effect also be testing the implementation of \emph{Service}. We want our classes to be isolated from eachother so that our tests can run in isolation.
+
+\subsection{Code with dependency injection}
+\lstinputlisting{../presentation/code-examples/di-di.cs}
+
+In this example we take an instance of \emph{IService} to the constructor which is resolved by our IoC-container, which means that \emph{IService} will automatically be resolved to \emph{Service}.
+
+The implementation of \emph{ServiceUser} is no longer depedendent on the direct implementation of \emph{Service}. As we are using an interface instead we can easily mock \emph{IService} and make it return whatever we want for whatever test we are writing.
+
+\section{Dependency injection in EPiSERVER}
+EPiSERVER are slowly starting to write modern code and now include StructureMap which is their IoC-container.
+
+\subsection{How not to get an instance of an interface}
+Reading forum posts about EPiSERVER we are often told to do the following when we want an instance of, in this case, \emph{IContentRepository}.
+
+\lstinputlisting{../presentation/code-examples/di-servicelocator.cs}
+
+This is not a good idea. The disadvantages of this are as follow:
+\begin{itemize}
+	\item It's very ugly
+	\item It requires more code for mockup
+	\item Class dependencies not listed in constructor
+\end{itemize}
+
+\subsection{The correct way to get an instance}
+The correct way to get an instance is the following:
+\lstinputlisting{../presentation/code-examples/di-servicelocator-ok.cs}
+
+In other words, we want to get our dependencies via the constructor as it allows us to write unit tests easier and also lets us easily see the dependencies of each class in the constructor.
+
+\subsection{Registering your own service}
+All of EPiSERVERs classes are registered by default. When you build your own services you can register them like this:
+\lstinputlisting{../presentation/code-examples/di-structuremap.cs}
+
+\section{Unit testing frameworks}
+There are two main frameworks for working with unit tests in Visual Studio.
+\begin{itemize}
+	\item MS-Test
+	\begin{itemize}
+		\item (+) Included in visual studio
+	\end{itemize}
+	\item NUnit
+	\begin{itemize}
+		\item (+) Code is more readable
+		\item (+) Supports multiple test cases for same test
+	\end{itemize}
+\end{itemize}
+
+I prefer NUnit but which one you use does not make a big difference.
+
+\section{Mocking frameworks}
+There are A LOT of frameworks to choose from, examples are:
+\begin{itemize}
+	\item Moq
+	\begin{itemize}
+		\item (+) Popular in the EPiSERVER community
+		\item (+) Lots of StackOverflow posts
+		\item (+) Been around for ages
+		\item (-) Lambda hell $\Rightarrow$ Difficult to read
+	\end{itemize}
+	\item NSubstitute
+	\begin{itemize}
+		\item (+) Scarce use of lambdas $\Rightarrow$ Easy to read
+		\item (+) Lots of StackOverflow posts
+		\item (-) Not popular in the EPiSERVER community
+	\end{itemize}
+\end{itemize}
+
+I prefer NSubstitute but which one you use does not make a big difference.
+
+\section{Writing tests}
+
+
+\end{document}
