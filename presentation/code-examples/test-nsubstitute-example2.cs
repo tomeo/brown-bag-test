@@ -9,7 +9,7 @@ public void ShouldReturnZeroWhenNoPagesWithCategory() {
 		.Returns(Enumerable.Empty<PageData>());
 
 	// Act
-	var result = _target.CountPagesByCategory(1);
+	var result = _target.CountPagesByCategory("SomeString");
 
 	// Assert
 	Assert.AreEqual(0, result);

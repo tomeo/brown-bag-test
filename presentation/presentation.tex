@@ -20,7 +20,7 @@
 	commentstyle=\color{greencomments},
 	keywordstyle=\color{bluekeywords},
 	stringstyle=\color{redstrings},
-	basicstyle=\fontsize{8}{8}\selectfont\ttfamily,
+	basicstyle=\fontsize{6}{6}\selectfont\ttfamily,
 	tabsize=3
 }
 \usetheme{Execushares}
@@ -45,7 +45,7 @@
 			\frametitle{What does it mean and why?} \pause
 			\begin{exampleblock}{What does it mean to write testable code?} \pause
 				\begin{itemize}
-					\item Write modules which are not tigthly bound to the implementation of any dependency \pause
+					\item Write modules which are not tightly bound to the implementation of any dependency \pause
 					\item Know the limitations of your testing frameworks and write your code accordingly \pause
 				\end{itemize}
 			\end{exampleblock}
@@ -226,6 +226,20 @@
 		\begin{frame}
 			\frametitle{Arrange, Act, Assert}
 			\lstinputlisting{code-examples/test-nsubstitute-example2.cs}
+		\end{frame}
+
+		\section{Unit testing in EPiSERVER}
+		\begin{frame}
+			\frametitle{Unit testing in EPiSERVER} \pause
+			\begin{itemize}
+				\item EPiSERVER and testability are two words seldomly seen in the same sentence \pause
+				\item EPiSERVER has started to write code closer to modern standards which has made things better - but not good  \pause
+				\begin{itemize}
+					\item Heavy use of static methods (FilterForVisitor.Filter(), Category.Find() etc) \pause
+					\item Heavy use of extension methods (almost anything in EPiSERVER Find) \pause
+					\item Lack of interfaces
+				\end{itemize}
+			\end{itemize}
 		\end{frame}
 
 		\section{Conclusion}

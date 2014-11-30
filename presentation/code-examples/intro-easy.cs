@@ -3,7 +3,7 @@ public class ExampleService {
 	private IContentRepository _repository;
 	private ICategoryService _categoryService;
 
-	public PageService(
+	public ExampleService(
 		IPageService pageService,
 		IContentRepository repository,
 		ICategoryService categoryService) {
@@ -12,8 +12,10 @@ public class ExampleService {
 		_categoryService = categoryService;
 	}
 
-	public int CountPagesByCategory(int categoryId) {
-		var category = _categoryService.Find(categoryId);
+	public int CountPagesByCategory(string categoryName) {
+		var category = _categoryService.Find(categoryName);
+		if (category == null) return 0;
+		
 		return _repository.Get<PageData>
 			(_pageService.GetStartPage())
 			.Where(p => p.Category)
