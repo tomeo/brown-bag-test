@@ -1,7 +1,6 @@
 \title{Unit Testing EPiSERVER}
 \author{Tommy Ivarsson}
 \date{\today}
-
 \documentclass[12pt]{article}
 \usepackage{color}
 \definecolor{bluekeywords}{rgb}{0.13,0.13,1}
@@ -9,8 +8,9 @@
 \definecolor{redstrings}{rgb}{0.9,0,0}
 \definecolor{light-gray}{gray}{0.85}
 \definecolor{white}{rgb}{1,1,1}
-\usepackage{listings}
-\lstset{language=[Sharp]C,
+\usepackage{listings,lstautogobble}
+\lstset{
+	language=[Sharp]C,
 	showspaces=false,
 	showtabs=false,
 	numbers=left,
@@ -23,7 +23,9 @@
 	keywordstyle=\color{bluekeywords},
 	stringstyle=\color{redstrings},
 	basicstyle=\fontsize{10}{10}\selectfont\ttfamily,
-	tabsize=3
+	tabsize=3,
+	xleftmargin=5.0ex,
+	autogobble=true
 }
 \begin{document}
 \maketitle
@@ -86,7 +88,7 @@ If your method depends on the state of your application then your code is not pr
 If your code is dependent on a specific environment to run properly then writing unit tests may be very difficult.
 
 \subsection{Independent of dependency implementation}
-You don't want your classes to be tightly bound to any other classes, unless those classes are models or entities. Relationships should as often as possible be via interface.
+You don't want your classes to be tightly bound to any other classes, unless those classes are models or entities. Relationships should preferably be defined using interfaces.
 
 \subsection{Dependencies are resolved using dependency injection}
 An object which uses a service should not create the instance of the service. The service should be injected to the object using dependency injection as this greatly increases the testability of your code.
@@ -96,6 +98,7 @@ An object which uses a service should not create the instance of the service. Th
 \vskip5mm
 \hspace*\fill{\small--- Wikipedia}
 
+~\\
 The real beauty of dependency injection is that while it in theory is a very complicated concept, actually using it is very easy.
 
 \subsection{Advantages of dependency injection}
@@ -109,19 +112,20 @@ The real beauty of dependency injection is that while it in theory is a very com
 \subsection{Code without dependency injection}
 \lstinputlisting{../presentation/code-examples/di-no-di.cs}
 
-As you can see on line $5$ we new up \emph{Service} which tightly binds this class to the implementation of \emph{Service}.
+As you can see on line $5$ we create a new instance of \emph{Service} via its constructor. This tightly binds the class \emph{ServiceUser} to the implementation of \emph{Service}.
 
-This means that any unit test testing this method will in effect also be testing the implementation of \emph{Service}. We want our classes to be isolated from eachother so that our tests can run in isolation.
-
+This means that any unit test testing this method will also be testing the implementation of \emph{Service}. We want our classes to be isolated from eachother so that our tests can run in isolation.
+~\\
 \subsection{Code with dependency injection}
 \lstinputlisting{../presentation/code-examples/di-di.cs}
 
-In this example we take an instance of \emph{IService} to the constructor which is resolved by our IoC-container, which means that \emph{IService} will automatically be resolved to \emph{Service}.
+The constructor takes an instance of \emph{IService} which is resolved by our IoC-container, which means that \emph{IService} will automatically be resolved to \emph{Service} when this code is run normally.
 
-The implementation of \emph{ServiceUser} is no longer depedendent on the direct implementation of \emph{Service}. As we are using an interface instead we can easily mock \emph{IService} and make it return whatever we want for whatever test we are writing.
+The implementation of \emph{ServiceUser} is no longer dependent on the direct implementation of \emph{Service}. As we are using an interface instead we can easily mock \emph{IService} and make it return whatever we want for whatever test we are writing.
 
+~\\
 \section{Dependency injection in EPiSERVER}
-EPiSERVER are slowly starting to write modern code and now include StructureMap which is their IoC-container.
+EPiSERVER comes with dependency injection out of the box.
 
 \subsection{How not to get an instance of an interface}
 Reading forum posts about EPiSERVER we are often told to do the following when we want an instance of, in this case, \emph{IContentRepository}.
@@ -182,6 +186,80 @@ There are A LOT of frameworks to choose from, examples are:
 I prefer NSubstitute but which one you use does not make a big difference.
 
 \section{Writing tests}
+Lets begin by looking at the tools that are generally needed for writing tests the way I prefer.
 
+\subsection{Tools}
+\begin{itemize}
+	\item NUnit - Our chosen test framework
+	\item NUnit Test Adapter - Allows you to run NUnit tests inside Visual Studio. It also enables running your NUnit tests during your TFS-builds.
+	\item NSubstitute - Our chosen mocking framework
+\end{itemize}
 
+\subsection{Methodologies}
+As with everything else there are certain methodologies we would like to follow in order to get as much use out of our tests as possible.
+
+\begin{itemize}
+	\item We don't want to test logic written by a third party. We test our own logic.
+	\item Be structured. One folder for each class being tested. One test file for each method.
+	\item Use descriptive test names. It's very important that we quickly understand what's not working when a test fails.
+	\item We want to write our tests using AAA - Arrange, Act, Assert. That is, we setup our test, we act it out and then we assert the results.
+\end{itemize}
+
+\subsection{Simple example}
+\lstinputlisting{../presentation/code-examples/test-easy.cs}
+
+As you can see we have a class \emph{Adder} which has a method \emph{Add} which takes to parameters \emph{a} and \emph{b} and returns the sum of those parameters.
+
+We begin by annotating the test class with \emph{TestFixture}. This tells NUnit that the class contains tests.
+
+We give the class a private attribute \emph{Adder} and call it \emph{\_target} to make it clear that this is the class we are testing.
+
+We write a method \emph{Init} which we annotate with \emph{[SetUp]}. This tells NUnit we want to run this method before each test in the file.
+
+We now have everything setup to write a test. We tell NUnit that it is a test by annotating our method with \emph{[Test]}. We give the method a descriptive name, \emph{ShouldReturnTheSumOfParameters}.
+
+As this method is very straight forward there is no clear Arrange, Act, Assert. In this case you could see the method \emph{Init()} as the arrange, the calls to \emph{\_target.Add(a,b)} as the act and the calls to \emph{Assert(expected, actual)} as the Assert.
+
+\subsection{TestCase example}
+\lstinputlisting{../presentation/code-examples/test-easy2.cs}
+
+NUnit gives you the option of using the annotation \emph{[TestCase]} which could simplify our previous test. We give our test method the parameters \emph{a}, \emph{b} and \emph{expected} and give it three \emph{[TestCase]} annotations containing the values we want to use for each test.
+
+This test is now equivalent to the previous example.
+
+~\\
+\subsection{Recall this method}
+Let us now attempt to test it.
+
+\subsubsection{The setup}
+We begin by mocking all our dependencies using NSubstitute's \emph{Substitute.For}. We then create an instance of our target.
+
+\subsubsection{Arrange, Act, Assert}
+Our \emph{Arrange} in this case is making sure that our dependencies return the values we want them to for the methods that we use.
+
+Our \emph{Act} runs the method we are testing.
+
+Our \emph{Assert} checks the return value and in this case it also makes sure that the dependencies recieved the number of calls that we expected.
+
+\section{Unit testing in EPiSERVER}
+\begin{itemize}
+	\item As far as I have understood it has previously been very difficult to write tests for EPiSERVER.
+	\item They have made changes which have made things a lot better, however
+		\begin{itemize}
+			\item Heavy use of static methods (FilterForVisitor.Filter, Category.Find etc.)
+			\item Heavy use of extension methods (Almost anything in EPiSERVER Find)
+			\item Lack of interfaces for classes like UrlResolver make mocking difficult
+		\end{itemize}
+\end{itemize}
+
+\section{Conclusion}
+
+\subsection{A few simple pointers}
+\begin{itemize}
+	\item Test the class you are testing, not the dependencies
+	\item Use dependency injection properly
+	\item Isolate your logic
+	\item Programming is a craft. Care for your code like a proper
+craftsman
+\end{itemize}
 \end{document}
