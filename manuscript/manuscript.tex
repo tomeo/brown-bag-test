@@ -220,6 +220,7 @@ We now have everything setup to write a test. We tell NUnit that it is a test by
 
 As this method is very straight forward there is no clear Arrange, Act, Assert. In this case you could see the method \emph{Init()} as the arrange, the calls to \emph{\_target.Add(a,b)} as the act and the calls to \emph{Assert(expected, actual)} as the Assert.
 
+~\\
 \subsection{TestCase example}
 \lstinputlisting{../presentation/code-examples/test-easy2.cs}
 
@@ -229,22 +230,30 @@ This test is now equivalent to the previous example.
 
 ~\\
 \subsection{Recall this method}
+\lstinputlisting{../presentation/code-examples/intro-easy.cs}
+
 Let us now attempt to test it.
 
+~\\
 \subsubsection{The setup}
+\lstinputlisting{../presentation/code-examples/test-nsubstitute-example.cs}
 We begin by mocking all our dependencies using NSubstitute's \emph{Substitute.For}. We then create an instance of our target.
 
+~\\
 \subsubsection{Arrange, Act, Assert}
+\lstinputlisting{../presentation/code-examples/test-nsubstitute-example2.cs}
+
 Our \emph{Arrange} in this case is making sure that our dependencies return the values we want them to for the methods that we use.
 
 Our \emph{Act} runs the method we are testing.
 
 Our \emph{Assert} checks the return value and in this case it also makes sure that the dependencies recieved the number of calls that we expected.
 
+~\\
 \section{Unit testing in EPiSERVER}
 \begin{itemize}
 	\item As far as I have understood it has previously been very difficult to write tests for EPiSERVER.
-	\item They have made changes which have made things a lot better, however
+	\item They have made changes which have made things a lot better, however there are still a few things that cause problems.
 		\begin{itemize}
 			\item Heavy use of static methods (FilterForVisitor.Filter, Category.Find etc.)
 			\item Heavy use of extension methods (Almost anything in EPiSERVER Find)
