@@ -1,7 +1,7 @@
 [Test]
 public void ShouldReturnZeroWhenNoPagesWithCategory() {
 	// Arrange
-	var currentCategory = Substitute.For<Category>();
+	var category = Substitute.For<Category>();
 	_categoryService.Find(Arg.Any<int>).Returns(category);
 	var startPage = Substitute.For<PageData>();
 	_pageService.GetStartPage().Returns(startPage);
